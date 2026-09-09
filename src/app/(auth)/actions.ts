@@ -43,8 +43,7 @@ export async function signUp(_prev: ActionResult, formData: FormData): Promise<A
   });
 
   if (error) {
-    const debugMsg = "تعذر إنشاء الحساب (" + error.message + ").";
-    return { error: error.message === "User already registered" ? "هذا البريد الإلكتروني مسجّل مسبقًا" : debugMsg };
+    return { error: error.message === "User already registered" ? "هذا البريد الإلكتروني مسجّل مسبقًا" : "تعذر إنشاء الحساب. حاول مرة أخرى." };
   }
 
   if (data.session) {
