@@ -5,6 +5,7 @@ import {
   AlertTriangle,
   Wrench,
   Boxes,
+  Bug,
   History,
   Settings,
   type LucideIcon,
@@ -35,6 +36,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/findings", label: "عدم المطابقات", icon: AlertTriangle },
   { href: "/capas", label: "الإجراءات التصحيحية", icon: Wrench },
   { href: "/assets", label: "الأصول والمعدات", icon: Boxes },
+  { href: "/sanitation", label: "النظافة ومكافحة الحشرات", icon: Bug },
   {
     href: "/audit",
     label: "سجل التدقيق",

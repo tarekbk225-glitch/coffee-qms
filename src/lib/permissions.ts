@@ -23,6 +23,8 @@ export const PERMISSIONS = {
   CAPA_CLOSE: "capa.close",
   ASSET_CREATE: "asset.create",
   ASSET_EDIT: "asset.edit",
+  PEST_CONTROL_MANAGE: "pest_control.manage",
+  PEST_CONTROL_EXECUTE: "pest_control.execute",
   REPORT_VIEW: "report.view",
   REPORT_VIEW_ORG: "report.view.org",
 } as const;

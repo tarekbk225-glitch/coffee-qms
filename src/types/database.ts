@@ -75,6 +75,16 @@ export type AuditAction =
   | "deleted";
 export type SiteType = "factory" | "branch" | "warehouse" | "office";
 export type AreaType = "production" | "warehouse" | "storage" | "utility" | "office" | "other";
+export type SanitationStationType =
+  | "bait_station"
+  | "insect_light_trap"
+  | "pheromone_trap"
+  | "rodent_trap"
+  | "sanitation_checkpoint"
+  | "other";
+export type SanitationStationStatus = "active" | "inactive" | "removed";
+export type PestActivityLevel = "none" | "low" | "medium" | "high";
+export type SanitationCondition = "clean" | "needs_attention" | "dirty";
 
 export interface Database {
   public: {
@@ -440,6 +450,7 @@ export interface Database {
           root_cause: string | null;
           status: FindingStatus;
           assigned_to: string | null;
+          sanitation_check_id: string | null;
           created_by: string | null;
           created_at: string;
           updated_at: string;
@@ -558,6 +569,61 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["assets"]["Row"]>;
         Relationships: [];
       };
+      sanitation_stations: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string;
+          area_id: string | null;
+          department_id: string | null;
+          station_code: string;
+          qr_code_token: string;
+          name: string;
+          name_ar: string | null;
+          station_type: SanitationStationType;
+          status: SanitationStationStatus;
+          target_pest: string | null;
+          installation_date: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["sanitation_stations"]["Row"]> & {
+          organization_id: string;
+          site_id: string;
+          station_code: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["sanitation_stations"]["Row"]>;
+        Relationships: [];
+      };
+      sanitation_checks: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string;
+          station_id: string;
+          check_number: string;
+          checked_by: string | null;
+          checked_at: string;
+          activity_level: PestActivityLevel;
+          pest_type_observed: string | null;
+          cleanliness_status: SanitationCondition | null;
+          chemical_used: string | null;
+          corrective_action: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["sanitation_checks"]["Row"]> & {
+          organization_id: string;
+          site_id: string;
+          station_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["sanitation_checks"]["Row"]>;
+        Relationships: [];
+      };
       evidence_files: {
         Row: {
           id: string;
@@ -670,6 +736,10 @@ export interface Database {
       finding_status: FindingStatus;
       capa_status: CapaStatus;
       asset_status: AssetStatus;
+      sanitation_station_type: SanitationStationType;
+      sanitation_station_status: SanitationStationStatus;
+      pest_activity_level: PestActivityLevel;
+      sanitation_condition: SanitationCondition;
     };
   };
 }

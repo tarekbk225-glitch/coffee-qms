@@ -132,6 +132,36 @@ export const questionTypeLabels: LabelMap<
   signature: { ar: "توقيع", en: "Signature" },
 };
 
+export const sanitationStationTypeLabels: LabelMap<
+  "bait_station" | "insect_light_trap" | "pheromone_trap" | "rodent_trap" | "sanitation_checkpoint" | "other"
+> = {
+  bait_station: { ar: "محطة طعم", en: "Bait Station" },
+  insect_light_trap: { ar: "مصيدة ضوئية للحشرات", en: "Insect Light Trap" },
+  pheromone_trap: { ar: "مصيدة فرمونية", en: "Pheromone Trap" },
+  rodent_trap: { ar: "مصيدة قوارض", en: "Rodent Trap" },
+  sanitation_checkpoint: { ar: "نقطة تفتيش نظافة", en: "Sanitation Checkpoint" },
+  other: { ar: "أخرى", en: "Other" },
+};
+
+export const sanitationStationStatusLabels: LabelMap<"active" | "inactive" | "removed"> = {
+  active: { ar: "نشطة", en: "Active" },
+  inactive: { ar: "غير نشطة", en: "Inactive" },
+  removed: { ar: "مُزالة", en: "Removed" },
+};
+
+export const pestActivityLevelLabels: LabelMap<"none" | "low" | "medium" | "high"> = {
+  none: { ar: "لا يوجد نشاط", en: "None" },
+  low: { ar: "منخفض", en: "Low" },
+  medium: { ar: "متوسط", en: "Medium" },
+  high: { ar: "مرتفع", en: "High" },
+};
+
+export const sanitationConditionLabels: LabelMap<"clean" | "needs_attention" | "dirty"> = {
+  clean: { ar: "نظيف", en: "Clean" },
+  needs_attention: { ar: "يحتاج متابعة", en: "Needs Attention" },
+  dirty: { ar: "غير نظيف", en: "Dirty" },
+};
+
 export const siteTypeLabels: LabelMap<"factory" | "branch" | "warehouse" | "office"> = {
   factory: { ar: "مصنع", en: "Factory" },
   branch: { ar: "فرع", en: "Branch" },
@@ -170,6 +200,8 @@ export const auditEntityLabels: Record<string, { ar: string; en: string }> = {
   capas: { ar: "إجراء تصحيحي", en: "CAPA" },
   assets: { ar: "أصل / معدة", en: "Asset" },
   evidence_files: { ar: "ملف دليل", en: "Evidence File" },
+  sanitation_stations: { ar: "محطة نظافة / مكافحة حشرات", en: "Sanitation/Pest Station" },
+  sanitation_checks: { ar: "فحص نظافة / مكافحة حشرات", en: "Sanitation/Pest Check" },
 };
 
 export function auditEntityLabel(entityType: string) {
@@ -195,11 +227,18 @@ export function badgeToneForFindingSeverity(s: keyof typeof findingSeverityLabel
 }
 
 export function badgeToneForStatus(status: string) {
-  const positive = ["published", "approved", "closed", "pass", "active"];
-  const negative = ["rejected", "critical", "fail", "retired"];
-  const warn = ["under_review", "verification", "action_required", "investigation", "high", "urgent"];
+  const positive = ["published", "approved", "closed", "pass", "active", "clean"];
+  const negative = ["rejected", "critical", "fail", "retired", "dirty", "removed"];
+  const warn = ["under_review", "verification", "action_required", "investigation", "high", "urgent", "needs_attention"];
   if (positive.includes(status)) return "success" as const;
   if (negative.includes(status)) return "destructive" as const;
   if (warn.includes(status)) return "warning" as const;
   return "neutral" as const;
+}
+
+export function badgeToneForPestActivity(level: "none" | "low" | "medium" | "high") {
+  return { none: "neutral", low: "neutral", medium: "warning", high: "destructive" }[level] as
+    | "neutral"
+    | "warning"
+    | "destructive";
 }
