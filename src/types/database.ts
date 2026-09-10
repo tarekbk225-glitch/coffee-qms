@@ -85,6 +85,26 @@ export type SanitationStationType =
 export type SanitationStationStatus = "active" | "inactive" | "removed";
 export type PestActivityLevel = "none" | "low" | "medium" | "high";
 export type SanitationCondition = "clean" | "needs_attention" | "dirty";
+export type DocumentType =
+  | "sop"
+  | "policy"
+  | "work_instruction"
+  | "form"
+  | "specification"
+  | "haccp_document"
+  | "cleaning_procedure"
+  | "maintenance_procedure"
+  | "other";
+export type DocumentStatus = "draft" | "review" | "approved" | "active" | "obsolete";
+export type CertificateType =
+  | "municipality_license"
+  | "health_certificate"
+  | "civil_defense_certificate"
+  | "environmental_approval"
+  | "industrial_license"
+  | "food_safety_certification"
+  | "other";
+export type CertificateStatus = "active" | "renewed" | "cancelled";
 
 export interface Database {
   public: {
@@ -624,6 +644,63 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["sanitation_checks"]["Row"]>;
         Relationships: [];
       };
+      documents: {
+        Row: {
+          id: string;
+          organization_id: string;
+          parent_document_id: string | null;
+          department_id: string | null;
+          document_number: string;
+          title: string;
+          title_ar: string | null;
+          document_type: DocumentType;
+          version: number;
+          status: DocumentStatus;
+          owner_id: string | null;
+          created_by: string | null;
+          approved_by: string | null;
+          approved_at: string | null;
+          effective_date: string | null;
+          review_date: string | null;
+          obsoleted_at: string | null;
+          notes: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["documents"]["Row"]> & {
+          organization_id: string;
+          title: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["documents"]["Row"]>;
+        Relationships: [];
+      };
+      certificates: {
+        Row: {
+          id: string;
+          organization_id: string;
+          site_id: string | null;
+          certificate_number: string;
+          name: string;
+          name_ar: string | null;
+          certificate_type: CertificateType;
+          issuing_authority: string | null;
+          external_reference: string | null;
+          issue_date: string | null;
+          expiry_date: string | null;
+          status: CertificateStatus;
+          responsible_user_id: string | null;
+          notes: string | null;
+          created_by: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Database["public"]["Tables"]["certificates"]["Row"]> & {
+          organization_id: string;
+          name: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["certificates"]["Row"]>;
+        Relationships: [];
+      };
       evidence_files: {
         Row: {
           id: string;
@@ -727,6 +804,10 @@ export interface Database {
         Args: { p_template_id: string };
         Returns: string;
       };
+      create_document_revision: {
+        Args: { p_document_id: string };
+        Returns: string;
+      };
     };
     Enums: {
       template_status: TemplateStatus;
@@ -740,6 +821,10 @@ export interface Database {
       sanitation_station_status: SanitationStationStatus;
       pest_activity_level: PestActivityLevel;
       sanitation_condition: SanitationCondition;
+      document_type: DocumentType;
+      document_status: DocumentStatus;
+      certificate_type: CertificateType;
+      certificate_status: CertificateStatus;
     };
   };
 }
