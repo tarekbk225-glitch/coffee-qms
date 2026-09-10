@@ -15,7 +15,12 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { certificateTypeLabels, certificateStatusLabels, certificateExpiryTone } from "@/lib/labels";
+import {
+  certificateTypeLabels,
+  certificateStatusLabels,
+  certificateDisplayStatus,
+  certificateExpiryTone,
+} from "@/lib/labels";
 import { formatDate } from "@/lib/format";
 import { updateCertificate, changeCertificateStatus } from "../../actions";
 import type { Database, CertificateStatus } from "@/types/database";
@@ -35,6 +40,7 @@ export function CertificateDetail({ certificate, canManage }: { certificate: Cer
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const tone = certificate.status === "active" ? certificateExpiryTone(certificate.expiry_date) : "neutral";
+  const displayStatus = certificateDisplayStatus(certificate.status, certificate.expiry_date);
 
   function runStatus(status: CertificateStatus) {
     startTransition(async () => {
@@ -71,7 +77,7 @@ export function CertificateDetail({ certificate, canManage }: { certificate: Cer
         actions={
           <div className="flex flex-wrap items-center gap-2">
             <Badge variant={tone}>انتهاء: {formatDate(certificate.expiry_date)}</Badge>
-            <StatusBadge status={certificate.status} label={certificateStatusLabels[certificate.status].ar} />
+            <StatusBadge status={displayStatus.key} label={displayStatus.label.ar} />
           </div>
         }
       />
