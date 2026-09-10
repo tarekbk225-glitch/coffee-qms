@@ -31,9 +31,16 @@ function KpiCard({ title, value, href, icon: Icon, tone = "default" }: KpiCardPr
       : tone === "warning"
         ? "text-[#c98500]"
         : "text-accent";
+  // prefetch={false}: there are 8 of these cards, each pointing at a
+  // differently-filtered view. Next.js prefetches a Link as soon as it
+  // scrolls into view, which meant every dashboard load was silently firing
+  // 8 extra server-rendered page requests (each running its own Supabase
+  // queries) before the user ever clicked one - real backend load for
+  // almost no benefit. A normal click still navigates instantly either way.
   return (
     <Link
       href={href}
+      prefetch={false}
       className="group flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="flex items-center justify-between">
