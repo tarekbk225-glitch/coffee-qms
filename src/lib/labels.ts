@@ -224,6 +224,22 @@ export function certificateExpiryTone(expiryDate: string | null): "success" | "w
   return "success";
 }
 
+// A certificate keeps a DB status of "active" until a person marks it
+// "renewed" or "cancelled" - the stored status alone never reflects an
+// expiry date that has simply passed. This derives what should actually be
+// shown to the user: once expiry_date is in the past, an "active" record
+// displays as "منتهية الصلاحية" (Expired) instead of "سارية" (Active),
+// both in badge color and label text.
+export function certificateDisplayStatus(
+  status: "active" | "renewed" | "cancelled",
+  expiryDate: string | null,
+): { key: "active" | "renewed" | "cancelled" | "expired"; label: { ar: string; en: string } } {
+  if (status === "active" && expiryDate && new Date(expiryDate).getTime() < Date.now()) {
+    return { key: "expired", label: { ar: "منتهية الصلاحية", en: "Expired" } };
+  }
+  return { key: status, label: certificateStatusLabels[status] };
+}
+
 export const siteTypeLabels: LabelMap<"factory" | "branch" | "warehouse" | "office"> = {
   factory: { ar: "مصنع", en: "Factory" },
   branch: { ar: "فرع", en: "Branch" },
@@ -292,7 +308,7 @@ export function badgeToneForFindingSeverity(s: keyof typeof findingSeverityLabel
 
 export function badgeToneForStatus(status: string) {
   const positive = ["published", "approved", "closed", "pass", "active", "clean", "renewed"];
-  const negative = ["rejected", "critical", "fail", "retired", "dirty", "removed", "obsolete", "cancelled"];
+  const negative = ["rejected", "critical", "fail", "retired", "dirty", "removed", "obsolete", "cancelled", "expired"];
   const warn = [
     "under_review",
     "verification",
