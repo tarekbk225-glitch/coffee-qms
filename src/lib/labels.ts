@@ -162,6 +162,68 @@ export const sanitationConditionLabels: LabelMap<"clean" | "needs_attention" | "
   dirty: { ar: "غير نظيف", en: "Dirty" },
 };
 
+export const documentTypeLabels: LabelMap<
+  | "sop"
+  | "policy"
+  | "work_instruction"
+  | "form"
+  | "specification"
+  | "haccp_document"
+  | "cleaning_procedure"
+  | "maintenance_procedure"
+  | "other"
+> = {
+  sop: { ar: "إجراء تشغيل قياسي (SOP)", en: "SOP" },
+  policy: { ar: "سياسة", en: "Policy" },
+  work_instruction: { ar: "تعليمات عمل", en: "Work Instruction" },
+  form: { ar: "نموذج", en: "Form" },
+  specification: { ar: "مواصفة", en: "Specification" },
+  haccp_document: { ar: "مستند HACCP", en: "HACCP Document" },
+  cleaning_procedure: { ar: "إجراء نظافة", en: "Cleaning Procedure" },
+  maintenance_procedure: { ar: "إجراء صيانة", en: "Maintenance Procedure" },
+  other: { ar: "أخرى", en: "Other" },
+};
+
+export const documentStatusLabels: LabelMap<"draft" | "review" | "approved" | "active" | "obsolete"> = {
+  draft: { ar: "مسودة", en: "Draft" },
+  review: { ar: "قيد المراجعة", en: "Under Review" },
+  approved: { ar: "معتمد", en: "Approved" },
+  active: { ar: "ساري", en: "Active" },
+  obsolete: { ar: "ملغى", en: "Obsolete" },
+};
+
+export const certificateTypeLabels: LabelMap<
+  | "municipality_license"
+  | "health_certificate"
+  | "civil_defense_certificate"
+  | "environmental_approval"
+  | "industrial_license"
+  | "food_safety_certification"
+  | "other"
+> = {
+  municipality_license: { ar: "شهادة الصلاحية / رخصة البلدية", en: "Municipality License" },
+  health_certificate: { ar: "شهادة صحية", en: "Health Certificate" },
+  civil_defense_certificate: { ar: "شهادة الدفاع المدني", en: "Civil Defense Certificate" },
+  environmental_approval: { ar: "موافقة بيئية", en: "Environmental Approval" },
+  industrial_license: { ar: "رخصة صناعية", en: "Industrial License" },
+  food_safety_certification: { ar: "شهادة سلامة غذائية (ISO 22000 / HACCP)", en: "Food Safety Certification" },
+  other: { ar: "أخرى", en: "Other" },
+};
+
+export const certificateStatusLabels: LabelMap<"active" | "renewed" | "cancelled"> = {
+  active: { ar: "سارية", en: "Active" },
+  renewed: { ar: "تم التجديد", en: "Renewed" },
+  cancelled: { ar: "ملغاة", en: "Cancelled" },
+};
+
+export function certificateExpiryTone(expiryDate: string | null): "success" | "warning" | "destructive" | "neutral" {
+  if (!expiryDate) return "neutral";
+  const days = Math.ceil((new Date(expiryDate).getTime() - Date.now()) / 86400000);
+  if (days < 0) return "destructive";
+  if (days <= 30) return "warning";
+  return "success";
+}
+
 export const siteTypeLabels: LabelMap<"factory" | "branch" | "warehouse" | "office"> = {
   factory: { ar: "مصنع", en: "Factory" },
   branch: { ar: "فرع", en: "Branch" },
@@ -202,6 +264,8 @@ export const auditEntityLabels: Record<string, { ar: string; en: string }> = {
   evidence_files: { ar: "ملف دليل", en: "Evidence File" },
   sanitation_stations: { ar: "محطة نظافة / مكافحة حشرات", en: "Sanitation/Pest Station" },
   sanitation_checks: { ar: "فحص نظافة / مكافحة حشرات", en: "Sanitation/Pest Check" },
+  documents: { ar: "مستند", en: "Document" },
+  certificates: { ar: "شهادة / ترخيص", en: "Certificate/License" },
 };
 
 export function auditEntityLabel(entityType: string) {
@@ -227,9 +291,18 @@ export function badgeToneForFindingSeverity(s: keyof typeof findingSeverityLabel
 }
 
 export function badgeToneForStatus(status: string) {
-  const positive = ["published", "approved", "closed", "pass", "active", "clean"];
-  const negative = ["rejected", "critical", "fail", "retired", "dirty", "removed"];
-  const warn = ["under_review", "verification", "action_required", "investigation", "high", "urgent", "needs_attention"];
+  const positive = ["published", "approved", "closed", "pass", "active", "clean", "renewed"];
+  const negative = ["rejected", "critical", "fail", "retired", "dirty", "removed", "obsolete", "cancelled"];
+  const warn = [
+    "under_review",
+    "verification",
+    "action_required",
+    "investigation",
+    "high",
+    "urgent",
+    "needs_attention",
+    "review",
+  ];
   if (positive.includes(status)) return "success" as const;
   if (negative.includes(status)) return "destructive" as const;
   if (warn.includes(status)) return "warning" as const;
