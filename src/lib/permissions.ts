@@ -25,6 +25,7 @@ export const PERMISSIONS = {
   ASSET_EDIT: "asset.edit",
   PEST_CONTROL_MANAGE: "pest_control.manage",
   PEST_CONTROL_EXECUTE: "pest_control.execute",
+  DOCUMENT_MANAGE: "document.manage",
   REPORT_VIEW: "report.view",
   REPORT_VIEW_ORG: "report.view.org",
 } as const;
