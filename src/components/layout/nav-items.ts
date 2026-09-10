@@ -6,6 +6,7 @@ import {
   Wrench,
   Boxes,
   Bug,
+  FileBadge,
   History,
   Settings,
   type LucideIcon,
@@ -37,6 +38,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/capas", label: "الإجراءات التصحيحية", icon: Wrench },
   { href: "/assets", label: "الأصول والمعدات", icon: Boxes },
   { href: "/sanitation", label: "النظافة ومكافحة الحشرات", icon: Bug },
+  { href: "/documents", label: "المستندات والشهادات", icon: FileBadge },
   {
     href: "/audit",
     label: "سجل التدقيق",
