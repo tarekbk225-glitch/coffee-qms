@@ -10,7 +10,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { certificateTypeLabels, certificateStatusLabels, certificateExpiryTone } from "@/lib/labels";
+import { certificateTypeLabels, certificateDisplayStatus, certificateExpiryTone } from "@/lib/labels";
 import { formatDate } from "@/lib/format";
 import type { CertificateStatus, CertificateType } from "@/types/database";
 
@@ -92,6 +92,7 @@ export default async function CertificatesPage({
               {certificates.map((c) => {
                 const site = c.site as unknown as { name: string; name_ar: string | null } | null;
                 const tone = c.status === "active" ? certificateExpiryTone(c.expiry_date) : "neutral";
+                const displayStatus = certificateDisplayStatus(c.status, c.expiry_date);
                 return (
                   <TableRow key={c.id}>
                     <TableCell className="font-medium" dir="ltr">
@@ -107,7 +108,7 @@ export default async function CertificatesPage({
                       <Badge variant={tone}>{formatDate(c.expiry_date)}</Badge>
                     </TableCell>
                     <TableCell>
-                      <StatusBadge status={c.status} label={certificateStatusLabels[c.status].ar} />
+                      <StatusBadge status={displayStatus.key} label={displayStatus.label.ar} />
                     </TableCell>
                   </TableRow>
                 );
