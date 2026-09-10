@@ -41,7 +41,7 @@ export function EvidenceUploader({
   readOnly = false,
 }: {
   organizationId: string;
-  entityType: "inspection" | "inspection_answer" | "finding" | "capa" | "asset";
+  entityType: "inspection" | "inspection_answer" | "finding" | "capa" | "asset" | "document" | "certificate";
   entityId: string;
   readOnly?: boolean;
 }) {
