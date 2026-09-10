@@ -5,11 +5,94 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 import { getSessionContext } from "@/lib/session";
-import type { DocumentStatus, DocumentType, CertificateStatus, CertificateType } from "@/types/database";
+import {
+  extractCertificateFields,
+  extractDocumentFields,
+  type ExtractedCertificateFields,
+  type ExtractedDocumentFields,
+} from "@/lib/document-extraction";
+import type {
+  DocumentStatus,
+  DocumentType,
+  CertificateStatus,
+  CertificateType,
+  EvidenceKind,
+} from "@/types/database";
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
 
 export interface ActionResult {
   error?: string;
   ok?: boolean;
+}
+
+// ------------------------------------------------------- AI file extraction
+//
+// Called directly from the "New Certificate" / "New Document" forms (not via
+// useActionState - just a plain server action invoked from a button's
+// onClick) to read an attached file and pre-fill the form. The user always
+// reviews the result before saving; nothing is written to the database here.
+
+export interface ExtractResult<T> {
+  error?: string;
+  data?: T;
+}
+
+export async function extractCertificateFieldsAction(
+  formData: FormData,
+): Promise<ExtractResult<ExtractedCertificateFields>> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "الرجاء اختيار ملف أولاً" };
+  return extractCertificateFields(file);
+}
+
+export async function extractDocumentFieldsAction(
+  formData: FormData,
+): Promise<ExtractResult<ExtractedDocumentFields>> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) return { error: "الرجاء اختيار ملف أولاً" };
+  return extractDocumentFields(file);
+}
+
+// ------------------------------------------------------------- shared upload
+
+function evidenceKindFor(mimeType: string): EvidenceKind {
+  if (mimeType.startsWith("image/")) return "photo";
+  if (mimeType.startsWith("video/")) return "video";
+  return "document";
+}
+
+// Uploads a file the user attached on a "New ..." form as the entity's first
+// evidence record, right after that entity is created. Best-effort: a
+// failure here is logged but never blocks creating the record itself, same
+// as if the user had just skipped attaching a file and used the evidence
+// uploader on the detail page afterwards.
+async function attachEvidenceIfPresent(
+  supabase: SupabaseServerClient,
+  organizationId: string,
+  entityType: "document" | "certificate",
+  entityId: string,
+  formData: FormData,
+) {
+  const file = formData.get(entityType === "certificate" ? "certificate_file" : "document_file");
+  if (!(file instanceof File) || file.size === 0) return;
+
+  const path = `${organizationId}/${entityType}/${entityId}/${crypto.randomUUID()}-${file.name}`;
+  const { error: uploadError } = await supabase.storage.from("evidence").upload(path, file, { upsert: false });
+  if (uploadError) {
+    console.error("attachEvidenceIfPresent upload failed:", uploadError.message);
+    return;
+  }
+  const { error: insertError } = await supabase.from("evidence_files").insert({
+    entity_type: entityType,
+    entity_id: entityId,
+    file_path: path,
+    file_name: file.name,
+    mime_type: file.type,
+    size_bytes: file.size,
+    kind: evidenceKindFor(file.type),
+  });
+  if (insertError) console.error("attachEvidenceIfPresent insert failed:", insertError.message);
 }
 
 // ---------------------------------------------------------------- documents
@@ -46,6 +129,8 @@ export async function createDocument(_prev: ActionResult, formData: FormData): P
     .single();
 
   if (error || !data) return { error: "تعذر إنشاء المستند: " + (error?.message ?? "") };
+
+  await attachEvidenceIfPresent(supabase, session.activeOrgId, "document", data.id, formData);
 
   revalidatePath("/documents");
   redirect(`/documents/${data.id}`);
@@ -133,6 +218,8 @@ export async function createCertificate(_prev: ActionResult, formData: FormData)
     .single();
 
   if (error || !data) return { error: "تعذر إنشاء السجل: " + (error?.message ?? "") };
+
+  await attachEvidenceIfPresent(supabase, session.activeOrgId, "certificate", data.id, formData);
 
   revalidatePath("/documents/certificates");
   redirect(`/documents/certificates/${data.id}`);
